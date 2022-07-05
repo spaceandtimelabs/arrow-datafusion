@@ -9,17 +9,6 @@ async fn tpch_q15_correlated() -> Result<()> {
     register_tpch_csv(&ctx, "supplier").await?;
     register_tpch_csv(&ctx, "lineitem").await?;
 
-    /*
-    #orders.o_orderpriority ASC NULLS LAST
-        Projection: #orders.o_orderpriority, #COUNT(UInt8(1)) AS order_count
-            Aggregate: groupBy=[[#orders.o_orderpriority]], aggr=[[COUNT(UInt8(1))]]
-                Filter: EXISTS (                                                         -- plan
-                    Subquery: Projection: *                                              -- proj
-                        Filter: #lineitem.l_orderkey = #orders.o_orderkey                -- filter
-                            TableScan: lineitem projection=None                          -- filter.input
-                )
-                    TableScan: orders projection=None                                    -- plan.inputs
-                 */
     let sql = r#"
             with revenue_view as (
                 select
