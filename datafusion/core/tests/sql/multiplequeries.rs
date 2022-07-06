@@ -45,7 +45,6 @@ async fn tpch_q15_correlated() -> Result<()> {
                 drop view revenue0;
         "#;
 
-    // Todo: Assert Plan when create_logical_plan works
     // assert plan
     let plan = ctx
         .create_logical_plan(sql)
@@ -62,7 +61,7 @@ async fn tpch_q15_correlated() -> Result<()> {
     Projection: #supplier.s_suppkey, #supplier.s_name, #supplier.s_address, #supplier.s_phone, #supplier.total_revenue
     Sort: #supplier.s_suppkey ASC NULLS LAST
     Projection: #supplier.s_suppkey, #supplier.s_name, #supplier.s_address, #supplier.s_phone, #supplier.total_revenue
-    Filter: #supplier.total_revenue = (Subquery: Projection: #MAX(revenue_view.total_revenue)
+    Filter: #supplier.total_revenue = #__sq_1.__value
     Aggregate: groupBy=[[]], aggr=[[MAX(#revenue_view.total_revenue)]]
     Projection: #lineitem.l_suppkey AS supplier_no, #SUM(lineitem.l_extendedprice * Int64(1) - lineitem.l_discount) AS total_revenue, alias=revenue_view
     Aggregate: groupBy=[[#lineitem.l_suppkey]], aggr=[[SUM(#lineitem.l_extendedprice * Int64(1) - #lineitem.l_discount)]]
@@ -74,6 +73,7 @@ async fn tpch_q15_correlated() -> Result<()> {
     Aggregate: groupBy=[[#lineitem.l_suppkey]], aggr=[[SUM(#lineitem.l_extendedprice * Int64(1) - #lineitem.l_discount)]]
     Filter: #lineitem.l_shipdate >= Utf8("1996-01-01") AND #lineitem.l_shipdate < Utf8("1996-04-01")
     TableScan: lineitem
+    Projection: #MAX(revenue_view.total_revenue AS __value, alias=__sq_1
     DropTable: revenue0"#
     .to_string();
     
