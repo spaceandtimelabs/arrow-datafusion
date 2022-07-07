@@ -47,7 +47,7 @@ use parking_lot::RwLock;
 use std::string::String;
 use std::sync::Arc;
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{HashMap, HashSet, VecDeque},
     fmt::Debug,
 };
 
@@ -483,6 +483,22 @@ impl SessionContext {
         let state = self.state.read().clone();
         let query_planner = SqlToRel::new(&state);
         query_planner.statement_to_plan(statements.pop_front().unwrap())
+    }
+
+    // support multiple sql
+    pub fn create_logical_plans(&self, sql: &str) -> VecDeque<Result<LogicalPlan>> {
+        let mut statements = DFParser::parse_sql(sql).unwrap();
+        let mut results: VecDeque<Result<LogicalPlan>> = VecDeque::new();
+
+        // create a query planner
+        let state = self.state.read().clone();
+        let query_planner = SqlToRel::new(&state);
+        
+        while statements.len()>0 {
+            results.push_back(query_planner.statement_to_plan(statements.pop_front().unwrap()));
+        }
+
+        return results;
     }
 
     /// Registers a variable provider within this context.

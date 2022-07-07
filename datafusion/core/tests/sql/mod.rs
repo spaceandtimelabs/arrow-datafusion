@@ -644,35 +644,46 @@ async fn plan_and_collect(ctx: &SessionContext, sql: &str) -> Result<Vec<RecordB
 
 /// Execute query and return results as a Vec of RecordBatches
 async fn execute_to_batches(ctx: &SessionContext, sql: &str) -> Vec<RecordBatch> {
+    println!("yayayayayyayayayayayayyaya!!!!!!");
     let msg = format!("Creating logical plan for '{}'", sql);
-    let plan = ctx
-        .create_logical_plan(sql)
+    let mut results: Vec<RecordBatch> = Vec::new();
+    let mut plans = ctx
+        .create_logical_plans(sql);
+
+    for sqlplan in plans.iter_mut() {
+        let plan = sqlplan
+        .as_ref()
         .map_err(|e| format!("{:?} at {}", e, msg))
         .unwrap();
-    let logical_schema = plan.schema();
 
-    let msg = format!("Optimizing logical plan for '{}': {:?}", sql, plan);
-    let plan = ctx
-        .optimize(&plan)
-        .map_err(|e| format!("{:?} at {}", e, msg))
-        .unwrap();
-    let optimized_logical_schema = plan.schema();
+        println!("{:?}",plan);
 
-    let msg = format!("Creating physical plan for '{}': {:?}", sql, plan);
-    let plan = ctx
-        .create_physical_plan(&plan)
+        let logical_schema = plan.schema();
+
+        let msg = format!("Optimizing logical plan for '{}': {:?}", sql, plan);
+        let plan = ctx
+            .optimize(&plan)
+            .map_err(|e| format!("{:?} at {}", e, msg))
+            .unwrap();
+        let optimized_logical_schema = plan.schema();
+
+        let msg = format!("Creating physical plan for '{}': {:?}", sql, plan);
+        let plan = ctx
+            .create_physical_plan(&plan)
+            .await
+            .map_err(|e| format!("{:?} at {}", e, msg))
+            .unwrap();
+
+        let msg = format!("Executing physical plan for '{}': {:?}", sql, plan);
+        let task_ctx = ctx.task_ctx();
+
+        results = collect(plan, task_ctx)
         .await
         .map_err(|e| format!("{:?} at {}", e, msg))
         .unwrap();
 
-    let msg = format!("Executing physical plan for '{}': {:?}", sql, plan);
-    let task_ctx = ctx.task_ctx();
-    let results = collect(plan, task_ctx)
-        .await
-        .map_err(|e| format!("{:?} at {}", e, msg))
-        .unwrap();
-
-    assert_eq!(logical_schema.as_ref(), optimized_logical_schema.as_ref());
+        assert_eq!(logical_schema.as_ref(), optimized_logical_schema.as_ref());
+    }    
     results
 }
 
