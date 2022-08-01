@@ -631,7 +631,7 @@ impl PhysicalExpr for InListExpr {
                         .unwrap();
                     Ok(set_contains_utf8(array, set, self.negated))
                 }
-                DataType::Decimal(_, _) => {
+                DataType::Decimal128(_, _) => {
                     let array = array.as_any().downcast_ref::<Decimal128Array>().unwrap();
                     Ok(make_set_contains_decimal(array, set, self.negated))
                 }
@@ -760,7 +760,7 @@ impl PhysicalExpr for InListExpr {
                     let null_array = new_null_array(&DataType::Boolean, array.len());
                     Ok(ColumnarValue::Array(Arc::new(null_array)))
                 }
-                DataType::Decimal(_, _) => {
+                DataType::Decimal128(_, _) => {
                     let decimal_array =
                         array.as_any().downcast_ref::<Decimal128Array>().unwrap();
                     Ok(make_list_contains_decimal(
@@ -1032,7 +1032,8 @@ mod tests {
     #[test]
     fn in_list_decimal() -> Result<()> {
         // Now, we can check the NULL type
-        let schema = Schema::new(vec![Field::new("a", DataType::Decimal(13, 4), true)]);
+        let schema =
+            Schema::new(vec![Field::new("a", DataType::Decimal128(13, 4), true)]);
         let array = vec![Some(100_0000_i128), None, Some(200_5000_i128)]
             .into_iter()
             .collect::<Decimal128Array>();
@@ -1278,7 +1279,8 @@ mod tests {
 
     #[test]
     fn in_list_set_decimal() -> Result<()> {
-        let schema = Schema::new(vec![Field::new("a", DataType::Decimal(13, 4), true)]);
+        let schema =
+            Schema::new(vec![Field::new("a", DataType::Decimal128(13, 4), true)]);
         let array = vec![Some(100_0000_i128), Some(200_5000_i128), None]
             .into_iter()
             .collect::<Decimal128Array>();
@@ -1320,7 +1322,8 @@ mod tests {
     #[test]
     fn test_cast_static_filter_to_set() -> Result<()> {
         // random schema
-        let schema = Schema::new(vec![Field::new("a", DataType::Decimal(13, 4), true)]);
+        let schema =
+            Schema::new(vec![Field::new("a", DataType::Decimal128(13, 4), true)]);
         // list of phy expr
         let mut phy_exprs = vec![
             lit(1i64),

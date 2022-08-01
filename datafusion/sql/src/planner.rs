@@ -4387,7 +4387,7 @@ mod tests {
                 ])),
                 "test_decimal" => Ok(Schema::new(vec![
                     Field::new("id", DataType::Int32, false),
-                    Field::new("price", DataType::Decimal(10, 2), false),
+                    Field::new("price", DataType::Decimal128(10, 2), false),
                 ])),
                 "person" => Ok(Schema::new(vec![
                     Field::new("id", DataType::UInt32, false),
