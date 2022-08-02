@@ -132,7 +132,7 @@ where
 {
     Ok(left
         .iter()
-        .map(|left| left.map(|left| op(left, right)))
+        .map(|left| left.map(|left| op(left.as_i128(), right)))
         .collect())
 }
 
@@ -151,7 +151,7 @@ where
         .zip(right.iter())
         .map(|(left, right)| {
             if let (Some(left), Some(right)) = (left, right) {
-                Some(op(left, right))
+                Some(op(left.as_i128(), right.as_i128()))
             } else {
                 None
             }
@@ -263,7 +263,7 @@ where
         .zip(right.iter())
         .map(|(left, right)| {
             if let (Some(left), Some(right)) = (left, right) {
-                Some(op(left, right)).transpose()
+                Some(op(left.as_i128(), right.as_i128())).transpose()
             } else {
                 Ok(None)
             }
@@ -282,7 +282,7 @@ where
     left.iter()
         .map(|left| {
             if let Some(left) = left {
-                Some(op(left, right)).transpose()
+                Some(op(left.as_i128(), right)).transpose()
             } else {
                 Ok(None)
             }
