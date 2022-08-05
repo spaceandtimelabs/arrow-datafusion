@@ -273,7 +273,7 @@ fn get_query_sql(query: usize) -> Result<Vec<String>> {
 fn create_logical_plans(ctx: &SessionContext, query: usize) -> Result<Vec<LogicalPlan>> {
     let sql = get_query_sql(query)?;
     sql.iter()
-        .map(|sql| ctx.create_logical_plan(sql.as_str()))
+        .map(|sql| ctx.create_logical_plan(sql.as_str())) // map of iterator<string> to lambda calling ctx.create_logical_plan on key producing LogicalPlan or Error
         .collect::<Result<Vec<_>>>()
 }
 
@@ -770,7 +770,7 @@ mod tests {
         run_query(14).await
     }
 
-    #[ignore] // https://github.com/apache/arrow-datafusion/issues/166
+    // #[ignore] // https://github.com/apache/arrow-datafusion/issues/166
     #[tokio::test]
     async fn run_q15() -> Result<()> {
         run_query(15).await

@@ -83,6 +83,7 @@ pub mod aggregates;
 #[cfg(feature = "avro")]
 pub mod avro;
 pub mod create_drop;
+mod create_view;
 pub mod errors;
 pub mod explain_analyze;
 pub mod expr;

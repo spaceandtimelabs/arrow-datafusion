@@ -187,8 +187,10 @@ impl<'a, S: ContextProvider> SqlToRel<'a, S> {
                 query,
                 with_options,
                 ..
-            } if columns.is_empty() && with_options.is_empty() => {
+            }
+            if /* columns.is_empty() && */ with_options.is_empty() => {
                 let plan = self.query_to_plan(*query, &mut HashMap::new())?;
+                println!("input:\n{}", plan.display_indent());
                 Ok(LogicalPlan::CreateView(CreateView {
                     name: name.to_string(),
                     input: Arc::new(plan),

@@ -491,6 +491,7 @@ impl SessionContext {
         let state = self.state.read().clone();
         let query_planner = SqlToRel::new(&state);
         query_planner.statement_to_plan(statements.pop_front().unwrap())
+        
     }
 
     /// Registers a variable provider within this context.
