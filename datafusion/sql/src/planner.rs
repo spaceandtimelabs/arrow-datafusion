@@ -19,7 +19,7 @@
 
 use crate::parser::{CreateExternalTable, DescribeTable, Statement as DFStatement};
 use arrow::datatypes::*;
-use datafusion_common::ToDFSchema;
+use datafusion_common::{context, ToDFSchema};
 use datafusion_expr::expr_rewriter::normalize_col;
 use datafusion_expr::expr_rewriter::normalize_col_with_schemas;
 use datafusion_expr::logical_plan::{
@@ -528,7 +528,8 @@ impl<'a, S: ContextProvider> SqlToRel<'a, S> {
         ctes: &mut HashMap<String, LogicalPlan>,
         outer_query_schema: Option<&DFSchema>,
     ) -> Result<LogicalPlan> {
-        let left = self.create_relation(t.relation, ctes, outer_query_schema)?;
+        let left = self.create_relation(t.relation, ctes, outer_query_schema)
+            .map_err(|e| context!("Cannot create relation!", e))?;
         match t.joins.len() {
             0 => Ok(left),
             _ => {
@@ -538,10 +539,11 @@ impl<'a, S: ContextProvider> SqlToRel<'a, S> {
                     joins.next().unwrap(),
                     ctes,
                     outer_query_schema,
-                )?;
+                ).map_err(|e| context!("Cannot parse relation to join!", e))?;
                 for join in joins {
                     left =
-                        self.parse_relation_join(left, join, ctes, outer_query_schema)?;
+                        self.parse_relation_join(left, join, ctes, outer_query_schema)
+                            .map_err(|e| context!("Cannot parse relation to join", e))?;
                 }
                 Ok(left)
             }
@@ -950,7 +952,8 @@ impl<'a, S: ContextProvider> SqlToRel<'a, S> {
         outer_query_schema: Option<&DFSchema>,
     ) -> Result<LogicalPlan> {
         // process `from` clause
-        let plans = self.plan_from_tables(select.from, ctes, outer_query_schema)?;
+        let plans = self.plan_from_tables(select.from, ctes, outer_query_schema)
+            .map_err(|e| context!("Cannot create plan from tables!", e))?;
         let empty_from = matches!(plans.first(), Some(LogicalPlan::EmptyRelation(_)));
 
         // process `where` clause

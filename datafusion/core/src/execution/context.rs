@@ -490,7 +490,9 @@ impl SessionContext {
         // create a query planner
         let state = self.state.read().clone();
         let query_planner = SqlToRel::new(&state);
-        query_planner.statement_to_plan(statements.pop_front().unwrap())
+        let stmt = statements.pop_front();
+        let stmt = stmt.unwrap();
+        query_planner.statement_to_plan(stmt)
         
     }
 
