@@ -93,7 +93,6 @@ pub trait TableProviderFactory: Sync + Send {
     /// Create a TableProvider during execution with schema already known from planning
     fn with_schema(
         &self,
-        ctx: &SessionState,
         schema: SchemaRef,
         table_type: &str,
         url: &str,

@@ -440,7 +440,6 @@ impl AsLogicalPlan for LogicalPlanNode {
                         ))
                     })?;
                 let provider = (*factory).with_schema(
-                    &state,
                     Arc::new(schema),
                     scan.table_type.as_str(),
                     scan.path.as_str(),
